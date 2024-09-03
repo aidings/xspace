@@ -6,25 +6,23 @@ from xspace._version import __version__
 
 
 _import_structure = {
-    "png_hide": ["PNGHide", "PNGMode"],
+    "hpng": ["PNGHide", "PNGMode"],
     "zips": ["zip_files", "unzip_files"],
     "utils": ["module_from_string", "object_from_config"],
     "object_from_config": ["ObjectFromConfig"],
-    "xnote": ["XNote"],
-    "model_tools": ["ModelTools", "ModelSaver", "ModelTyper"],
     "color_print": ["info", "debug", "error", "print_rainbow", "print_table", "color_print"],
     "timer": ["Timer", "timer"],
-    "trainslate": ["Translater", "Language", "ContentLanguage"],
     "markdown": ["Markdown"],
-    "config_dict": ["ConfigDict", "UserDict"],
-    "csv_evalue_dataset": ["CSVEvalueDataset"],
+    "config": ["ConfigDict", "UserDict"],
     "image_tools": ["ImageTypeReader", "ImageFolderReader", "to_pil", "to_npy"],
     "file_dirs": ["FileRoot", "RankFileWriter"],
     "state_dict": ["StateDict"],
     'check_types': ['check_function_input_types'],
     'timeout': ['Timeout'],
     'class_wargs': ['get_class_defaults'],
-    'reloader': ['Reloader']
+    'reloader': ['Reloader'],
+    'dstruct': ['StrEnum'],
+    'dict2attr': ['Dict2Attr']
 }
 
 __all__ = [
@@ -42,7 +40,9 @@ __all__ = [
     'check_function_input_types',
     'Timeout',
     'get_class_defaults',
-    'Reloader'
+    'Reloader',
+    'StrEnum',
+    'Dict2Attr'
 ]
 
 # Direct imports for type-checking
@@ -62,6 +62,8 @@ if TYPE_CHECKING:
     from .timeout import Timeout
     from .class_wargs import get_class_defaults
     from .reloader import Reloader
+    from .dstruct import StrEnum
+    from .dict2attr import Dict2Attr
 else:
     sys.modules[__name__] = LazyImporter(
         __name__,
