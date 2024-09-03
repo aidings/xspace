@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+import argparse
+from pathlib import Path
+from xspace import setup_pfile, ignore_pfile
+
+def create_version(package_name, inpackage=False):
+    import subprocess
+    result = subprocess.check_output('python -m setuptools_scm', shell=True)
+    version = result.decode(encoding='utf-8').strip() 
+    version = version.split('+')[0]
+    if inpackage:
+        with open(f'./src/{package_name}/_version.py', 'w') as f:
+            f.write(f"__version__ = '{version}'\n")
+    else:
+        with open(f'./{package_name}/src/{package_name}/_version.py', 'w') as f:
+            f.write(f"__version__ = '{version}'\n")
+
+def cmd():
+    parser = argparse.ArgumentParser('create python package...')
+    parser.add_argument('-n', '--package_name', help='input package name')
+    parser.add_argument('-f', '--force', action='store_true', help='force create project in exist package director')
+    parser.add_argument('-u', '--update', action='store_true', help='update version file')
+
+    return parser
+
+def new_pack(opt):
+    if opt.package_name is not None:
+        package_name = Path(opt.package_name)
+        if package_name.exists() and not opt.force:
+            raise RuntimeError('%s is already exists' % opt.package_name)
+        if '.' in package_name.as_posix():
+            raise RuntimeError(f'{opt.package_name} have illegal symbol[.]')
+        package_name.mkdir(parents=True, exist_ok=True)
+        package_name.joinpath('scripts').mkdir(parents=True, exist_ok=True)
+        package_name.joinpath('src', package_name.name).mkdir(parents=True, exist_ok=True)
+        package_name.joinpath('src', package_name.name, '__init__.py').open('w').close()
+
+        temp_strs = '# include src/project/*\n# recursive-include src/project *.*'
+        package_name.joinpath('MANIFEST.in').open('w').write(temp_strs)
+
+        with setup_pfile.open('r') as f, package_name.joinpath('setup.py').open('w') as w:
+            for line in f:
+                if '{name}' in line:
+                    line = line.replace('{name}', f'{package_name.name}')
+                w.write(line)
+        with ignore_pfile.open('r') as f, package_name.joinpath('.gitignore').open('w') as w: 
+            w.write(f.read())
+
+        print('project create in %s' % opt.package_name)
+
+def update_version(opt):
+    if opt.update is not None:
+        package_name = Path.cwd().name
+        validate = Path('.').joinpath('src', package_name).exists()
+        assert validate, f'{package_name} not found'
+        try:
+            create_version(package_name, inpackage=True)
+        except:
+            print('Error: must run in package director and .git already in this package director')
+
+if __name__ == '__main__':
+    parser = cmd()
+    opt = parser.parse_args()
+    if not opt.package_name and not opt.update:
+        parser.print_help()
+        exit(1)
+    new_pack(opt)
+    update_version(opt)

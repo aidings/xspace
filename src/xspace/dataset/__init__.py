@@ -1,7 +1,3 @@
-# xspace
-
-## lazy import
-```python
 import sys
 from typing import TYPE_CHECKING
 
@@ -10,19 +6,19 @@ from xspace._version import __version__
 
 
 _import_structure = {
-    "_plotting": ["plot_images", "plot_class_tabs", "plot_class_representations", "rgb_to_hex"],
+    "csv_evalue_dataset": ["CSVEvalueDataset"],
+    "index_warper": ["DatasetIndexWarpper"],
 }
 
 __all__ = [
-    "plot_images",
-    "plot_class_tabs",
-    "plot_class_representations",
-    "rgb_to_hex",
+    "CSVEvalueDataset",
+    "DatasetIndexWarpper",
 ]
 
 # Direct imports for type-checking
 if TYPE_CHECKING:
-    from ._plotting import plot_images, plot_class_tabs, plot_class_representations, rgb_to_hex
+    from .csv_evalue_dataset import CSVEvalueDataset
+    from .index_warper import DatasetIndexWarpper
 else:
     sys.modules[__name__] = LazyImporter(
         __name__,
@@ -30,4 +26,3 @@ else:
         _import_structure,
         extra_objects={"__version__": __version__},
     )
-```
