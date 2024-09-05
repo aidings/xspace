@@ -6,16 +6,8 @@
 # @description      :
 from setuptools import find_packages, setup
 
-try:
-    import subprocess
-    result = subprocess.check_output('python -m setuptools_scm', shell=True)
-    version = result.decode(encoding='utf-8').strip() 
-    version = version.split('+')[0]
-    with open('./src/{name}/_version.py', 'w') as f:
-        f.write(f"__version__ = '{version}'\n")
-except:
-    with open('./src/{name}/_version.py', 'r') as f:
-        version = f.read().split('=')[-1].strip().strip('\'')
+with open('./src/{name}/_version.py', 'r') as f:
+    version = f.read().split('=')[-1].strip().strip('\'')
 
 setup(name='{name}',        # package name
       version=version,      # version number

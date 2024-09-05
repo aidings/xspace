@@ -4,6 +4,23 @@ import yaml
 from loguru import logger
 from .config import ConfigDict
 from pathlib import Path
+from copy import deepcopy as dcopy
+
+class XKwargs(dict):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.copy = dcopy(kwargs) 
+    
+    def get(self, key, default=None):
+        if key in self:
+            return self.copy.pop(key)
+        return default
+
+    def left(self):
+        return self.copy
+    
+    def reset(self):
+        self.copy.update(self.__dict__)
 
 def get_class_defaults(conf_path=None, cls=None):
     # 创建参数字典
