@@ -31,3 +31,8 @@ else:
         extra_objects={"__version__": __version__},
     )
 ```
+
+## create or update a new version
+1. use `xproj -u` to update or create a new version
+2. use `git add . && git commit -m "message"` to commit changes
+3. use `git push origin master` to push changes to remote repository
