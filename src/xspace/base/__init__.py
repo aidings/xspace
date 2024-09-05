@@ -22,7 +22,8 @@ _import_structure = {
     'class_wargs': ['get_class_defaults', 'XKwargs'],
     'reloader': ['Reloader'],
     'dstruct': ['StrEnum'],
-    'dict2attr': ['Dict2Attr']
+    'dict2attr': ['Dict2Attr'],
+    'xnote': ['XNote', 'Image']
 }
 
 __all__ = [
@@ -42,7 +43,8 @@ __all__ = [
     'get_class_defaults', 'XKwargs',
     'Reloader',
     'StrEnum',
-    'Dict2Attr'
+    'Dict2Attr',
+    'XNote', 'Image'
 ]
 
 # Direct imports for type-checking
@@ -64,6 +66,7 @@ if TYPE_CHECKING:
     from .reloader import Reloader
     from .dstruct import StrEnum
     from .dict2attr import Dict2Attr
+    from .xnote import XNote, Image
 else:
     sys.modules[__name__] = LazyImporter(
         __name__,
