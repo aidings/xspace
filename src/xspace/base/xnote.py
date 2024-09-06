@@ -3,6 +3,7 @@ from pathlib import Path
 from openpyxl import Workbook, load_workbook
 from collections import OrderedDict
 from openpyxl.drawing.image import Image
+from loguru import logger
         
 class XNote:
     def __init__(self, xlsx_file, sheet_name='Sheet1', image_width=256):
@@ -15,6 +16,8 @@ class XNote:
             while isname in sheet_names:
                 isname = f"{sheet_name}_{num+1}"
                 num += 1
+            if num > 0:
+                logger.warning(f"Sheet name {sheet_name} already exists, use {isname} instead.")
             self.work_book_sheet = self.work_book.create_sheet(title=isname)
         else:
             self.work_book = Workbook()
@@ -90,19 +93,11 @@ class XNote:
         return self
     
     def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    def __del__(self):
         self.save()
     
-    def add_row(self, row_vals, row_idx=-1):
-        if row_idx == -1:
-            self.work_book_sheet.append(row_vals)
-        else:
-            for idx, val in enumerate(row_vals):
-                self.work_book_sheet.cell(row=row_idx+2, column=idx+1, value=val)
-
-    def set_head(self, head_names:list):
-        for col, name in enumerate(head_names):
-            self.work_book_sheet.cell(row=1, column=col+1, value=name)
-
     def save(self):
         ncol = len([col for col in self.work_book_sheet.columns])
         for col in range(ncol):
