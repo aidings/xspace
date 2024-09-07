@@ -23,7 +23,7 @@ _import_structure = {
     'reloader': ['Reloader'],
     'dstruct': ['StrEnum'],
     'dict2attr': ['Dict2Attr'],
-    'xnote': ['XNote', 'Image']
+    'xnote': ['XNote', 'Image', 'XNoteRow', 'XNoteCol']
 }
 
 __all__ = [
@@ -44,7 +44,7 @@ __all__ = [
     'Reloader',
     'StrEnum',
     'Dict2Attr',
-    'XNote', 'Image'
+    'XNote', 'Image', 'XNoteRow', 'XNoteCol'
 ]
 
 # Direct imports for type-checking
@@ -66,7 +66,7 @@ if TYPE_CHECKING:
     from .reloader import Reloader
     from .dstruct import StrEnum
     from .dict2attr import Dict2Attr
-    from .xnote import XNote, Image
+    from .xnote import XNote, Image, XNoteRow, XNoteCol
 else:
     sys.modules[__name__] = LazyImporter(
         __name__,
