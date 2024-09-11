@@ -49,7 +49,7 @@ class ZipFileReader:
         
         self.zip_ref = zipfile.ZipFile(zip_pth, 'r')
         self.name_list = self.zip_ref.namelist()
-        self.__get = self.__get_by_idx if use_idx_key else self.__get_by_pth
+        self.__get = self.get_by_idx if use_idx_key else self.__get_by_pth
         self.__idx = 0
         self.zip_root = zipfile.Path(self.zip_ref, at='')
     
@@ -57,7 +57,7 @@ class ZipFileReader:
         name = self.__get(index)
         return self.zip_root.joinpath(name).is_file()
     
-    def __get_by_idx(self, idx: int):
+    def get_by_idx(self, idx: int):
         return self.name_list[idx]
     
     def __get_by_pth(self, pth: str):
