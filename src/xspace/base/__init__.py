@@ -7,7 +7,7 @@ from xspace._version import __version__
 
 _import_structure = {
     "hpng": ["PNGHide", "PNGMode"],
-    "zips": ["zip_files", "unzip_files"],
+    "zips": ["zip_files", "unzip_files", "ZipFileReader"],
     "utils": ["module_from_string", "object_from_config"],
     "object_from_config": ["ObjectFromConfig"],
     "color_print": ["info", "debug", "error", "print_rainbow", "print_table", "color_print"],
@@ -28,7 +28,7 @@ _import_structure = {
 
 __all__ = [
     'PNGHide', 'PNGMode',
-    'zip_files', 'unzip_files',
+    'zip_files', 'unzip_files', 'ZipFileReader',
     'module_from_string', 'object_from_config',
     'ObjectFromConfig',
     'info', 'debug', 'error', 'print_rainbow', 'print_table', 'color_print',
@@ -50,7 +50,7 @@ __all__ = [
 # Direct imports for type-checking
 if TYPE_CHECKING:
     from .hpng import PNGHide, PNGMode
-    from .zips import zip_files, unzip_files
+    from .zips import zip_files, unzip_files, ZipFileReader
     from .utils import module_from_string, object_from_config
     from .object_from_config import ObjectFromConfig
     from .color_print import info, debug, error, print_rainbow, print_table, color_print

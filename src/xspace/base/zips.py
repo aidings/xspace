@@ -37,3 +37,54 @@ def unzip_files(zip_pth, root_path):
 
     zip_file.close() # 关闭文件，必须有，释放内存
     return len(nzip_list)
+
+class ZipFileReader:
+    """ ZipFileReader reads files from a zip file.
+
+        Args:
+            zip_pth (os.PathLike): zip file path.
+            use_idx_key (bool, optional): use index as key or file name as key. Defaults to False.
+    """
+    def __init__(self, zip_pth, use_idx_key=False):
+        
+        self.zip_ref = zipfile.ZipFile(zip_pth, 'r')
+        self.name_list = self.zip_ref.namelist()
+        self.__get = self.__get_by_idx if use_idx_key else self.__get_by_pth
+        self.__idx = 0
+        self.zip_root = zipfile.Path(self.zip_ref, at='')
+    
+    def is_file(self, index: int | str):
+        name = self.__get(index)
+        return self.zip_root.joinpath(name).is_file()
+    
+    def __get_by_idx(self, idx: int):
+        return self.name_list[idx]
+    
+    def __get_by_pth(self, pth: str):
+        return pth
+    
+    def __len__(self):
+        return len(self.name_list)
+    
+    def __getitem__(self, index):
+        name = self.__get(index)
+        return self.__read_file(name)
+    
+    def __setitem__(self, index, value):
+        raise NotImplementedError('ZipImageReader does not support assignment')
+    
+    def __iter__(self):
+        return self
+    
+    def __read_file(self, name: str):
+        with self.zip_ref.open(name) as f:
+            return f
+    
+    def __next__(self):
+        if self.__idx >= len(self.name_list):
+            self.__idx = 0
+            raise StopIteration
+        name = self.__get_by_idx(self.__idx)
+        self.__idx += 1
+        return self.__read_file(name)
+        
