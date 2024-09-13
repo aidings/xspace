@@ -176,6 +176,7 @@ def _create_html_viewer(
 
     html_viewer_id = short_uuid()
     html_viewer = """
+    <meta charset="utf-8">
     <style>
         #ipyplot-html-viewer-toggle-%(1)s {
             position: absolute;
