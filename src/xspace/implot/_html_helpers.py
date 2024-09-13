@@ -92,6 +92,7 @@ def _create_tabs(
     html = '<div>'
     tab_ids = [short_uuid() for label in tabs_order]
     style_html = """
+        <meta chatset="UTF-8">
         <style>
             input.ipyplot-tab-%(0)s {
                 display: none;
