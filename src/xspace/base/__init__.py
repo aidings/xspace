@@ -14,7 +14,7 @@ _import_structure = {
     "timer": ["Timer", "timer"],
     "markdown": ["Markdown"],
     "config": ["ConfigDict", "UserDict"],
-    "image_tools": ["ImageTypeReader", "ImageFolderReader", "to_pil", "to_npy"],
+    "image_tools": ["ImageTypeReader", "ImageFolderReader", "to_pil", "to_npy", "image2bytes"],
     "file_dirs": ["FileRoot", "RankFileWriter"],
     "state_dict": ["StateDict"],
     'check_types': ['check_function_input_types'],
@@ -23,7 +23,10 @@ _import_structure = {
     'reloader': ['Reloader'],
     'dstruct': ['StrEnum'],
     'dict2attr': ['Dict2Attr'],
-    'xnote': ['XNote', 'Image', 'XNoteRow', 'XNoteCol']
+    'xnote': ['XNote', 'Image', 'XNoteRow', 'XNoteCol'],
+    'product_parameter': ['ProductParameter'],
+    'extract_bracket': ['ExtractBrackets'],
+    'returns': ['Returns']
 }
 
 __all__ = [
@@ -35,7 +38,7 @@ __all__ = [
     'Timer', 'timer',
     'Markdown',
     'ConfigDict', 'UserDict',
-    'ImageTypeReader', 'ImageFolderReader', 'to_pil', 'to_npy',
+    'ImageTypeReader', 'ImageFolderReader', 'to_pil', 'to_npy', 'image2bytes',
     'FileRoot', 'RankFileWriter',
     'StateDict',
     'check_function_input_types',
@@ -44,7 +47,10 @@ __all__ = [
     'Reloader',
     'StrEnum',
     'Dict2Attr',
-    'XNote', 'Image', 'XNoteRow', 'XNoteCol'
+    'XNote', 'Image', 'XNoteRow', 'XNoteCol',
+    'ProductParameter',
+    'ExtractBrackets',
+    'Returns'
 ]
 
 # Direct imports for type-checking
@@ -57,7 +63,7 @@ if TYPE_CHECKING:
     from .timer import Timer, timer
     from .markdown import Markdown
     from .config import ConfigDict, UserDict
-    from .image_tools import ImageTypeReader, ImageFolderReader, to_pil, to_npy
+    from .image_tools import ImageTypeReader, ImageFolderReader, to_pil, to_npy, image2bytes
     from .file_dirs import FileRoot, RankFileWriter
     from .state_dict import StateDict
     from .check_types import check_function_input_types
@@ -67,6 +73,9 @@ if TYPE_CHECKING:
     from .dstruct import StrEnum
     from .dict2attr import Dict2Attr
     from .xnote import XNote, Image, XNoteRow, XNoteCol
+    from .product_parameter import ProductParameter
+    from .extract_bracket import ExtractBrackets
+    from .returns import Returns
 else:
     sys.modules[__name__] = LazyImporter(
         __name__,

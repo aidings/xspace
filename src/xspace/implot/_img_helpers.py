@@ -80,9 +80,7 @@ def _img_to_base64(
             # if dtype is float and values range is from 0.0 to 1.0
             # we need to normalize it to 0-255 range
             image = image * 255 if image.max() <= 1.0 else image
-            image = PIL.Image.fromarray(image.astype(np.uint8))
-        else:
-            image = PIL.Image.fromarray(image)
+        image = PIL.Image.fromarray(image.astype(np.uint8))
     elif type(image) is str | type(image) is str_:
         image = PIL.Image.open(image)
 

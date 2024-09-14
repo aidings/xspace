@@ -26,7 +26,8 @@ def plot_class_tabs(
         show_url: bool = True,
         force_b64: bool = False,
         tabs_order: Sequence[str | int] = None, 
-        display: bool = True):
+        display: bool | str = True,
+        head: str=None):
     """
     Efficient and convenient way of displaying images in interactive tabs grouped by labels.
     For tabs ordering and filtering check out `tabs_order` param.
@@ -88,6 +89,8 @@ def plot_class_tabs(
         force_b64=force_b64,
         tabs_order=tabs_order)
 
+    ihead = f"<p style='color:#000000;font-size:24px;margin-top:10px;text-align:center'>{head}</p>" if head is not None else ""
+    html = ihead + html
     if display:
         _display_html(html)
     elif isinstance(display, (str, os.PathLike)):
@@ -106,7 +109,8 @@ def plot_images(
         show_url: bool = True,
         force_b64: bool = False,
         text_color:str = '#000000',
-        display: bool | str = True):
+        display: bool | str = True,
+        head: str=None):
     """
     Simply displays images provided in `images` param in grid-like layout.
     Check optional params for max number of images to plot, labels and custom texts to add to each image, image width and other options.
@@ -165,6 +169,8 @@ def plot_images(
         force_b64=force_b64,
         text_color=text_color)
 
+    ihead = f"<p style='color:{text_color};font-size:24px;margin-top:10px;text-align:center'>{head}</p>" if head is not None else ""
+    html = ihead + html
     if display and isinstance(display, bool):
         _display_html(html)
     elif isinstance(display, (str, os.PathLike)):
@@ -184,8 +190,8 @@ def plot_class_representations(
         ignore_labels: Sequence[str | int] = None,
         labels_order: Sequence[str | int] = None,
         text_color:str ='#000000',
-        display: bool = True,
-        return_html: bool = False):
+        display: bool | str = True,
+        head: str=None):
     """
     Displays single image (first occurence for each class) for each label/class in grid-like layout.
     Check optional params for labels filtering, ignoring and ordering, image width and other options.
@@ -246,4 +252,6 @@ def plot_class_representations(
             force_b64=force_b64,
             text_color=text_color,
             display=display)
+    ihead = f"<p style='color:{text_color};font-size:24px;margin-top:10px;text-align:center'>{head}</p>" if head is not None else ""
+    html = ihead + html
     return html

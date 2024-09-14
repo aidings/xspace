@@ -87,3 +87,12 @@ class ImageFolderReader:
     def __getitem__(self, idx):
         return self.read_func(self.img_dir[idx])
 
+def image2bytes(img_buf: str|Path|Image.Image):
+    if isinstance(img_buf, (Path, str)):
+        return open(img_buf, 'rb').read()
+    elif isinstance(img_buf, Image.Image):
+        bytesIO = BytesIO()
+        img_buf.save(bytesIO, format='PNG')
+        return bytesIO.getvalue()
+    else:
+        raise ValueError('Error: Not support this type image buffer(byte, str, PIL.Image)')
