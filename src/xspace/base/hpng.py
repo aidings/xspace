@@ -2,6 +2,8 @@ from PIL import Image
 from loguru import logger
 from io import BytesIO
 from .dstruct import StrEnum
+from typing import Dict
+import json
 
 class PNGMode(StrEnum):
     ENDIAN = 'endian'
@@ -67,7 +69,7 @@ class PNGHide:
 
         return bytes(deserializeData)
 
-    def encode(self, inputImagePath: str|Image.Image, hide_strs: str, outputImagePath: str) -> None:
+    def encode(self, inputImagePath: str|Image.Image, hide_strs: str|Dict, outputImagePath: str) -> None:
         """
         This function hides the fileToHidePath file inside the image located at inputImagePath,
         and saves this modified image to outputImagePath.
@@ -76,6 +78,8 @@ class PNGHide:
 
         # data = fp.read()
         data = bytes(hide_strs, "utf-8")
+        if isinstance(hide_strs, Dict):
+            hide_strs = json.dumps(hide_strs, ensure_ascii=False)
         logger.debug("[*] {} file size : {} bytes".format(hide_strs, len(data)))
 
         if self.hide_mode == PNGMode.LSB:

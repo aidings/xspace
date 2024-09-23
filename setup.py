@@ -12,7 +12,7 @@ setup(name='xspace',  # 包名
       author_email='zhifeng.ding@hqu.edu.cn',
       url='https://github.com/aidings/pyproj.git',
       license='',
-      install_requires=['setuptools_scm', 'numpy', 'opencv-python', 'pyyaml', 
+      install_requires=['numpy', 'opencv-python', 'pyyaml', 
                         'ipython', 'pillow', 'loguru', 'six', 'imageio>=2.34.0', 
                         'torch', 'torchvision', 'tqdm', 'safetensors', 'openpyxl'],
       extras_require={},
