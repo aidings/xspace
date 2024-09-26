@@ -3,6 +3,7 @@ import json
 import yaml
 from loguru import logger
 from .config import ConfigDict
+
 from pathlib import Path
 from copy import deepcopy as dcopy
 
@@ -67,3 +68,44 @@ def get_class_defaults(conf_path=None, cls=None):
         args_dict = conf
     
     return args_dict
+
+
+class Input2Wargs:
+    def __init__(self, func):
+        sigature = inspect.signature(func)
+        self.defaults = {}
+        self.okeys = []
+        if inspect.isfunction(func):
+            for k, v in sigature.parameters.items():
+                self.defaults[k] = v.default
+                self.okeys.append(k)
+        elif inspect.ismethod(func):
+            for k, v in sigature.parameters.items():
+                if k == "self":
+                    continue
+                self.defaults[k] = v.default
+                self.okeys.append(k)
+        else:
+            raise TypeError(f"Unsupported function type: {type(func)}")
+        self.skeys = set(self.okeys)
+    
+    def __call__(self, *args, **kwargs):
+        params = {}
+        params.update(kwargs)
+        n = len(args)
+        for k, v in zip(self.okeys[:n], args):
+            params[k] = v
+        
+        return params
+    
+    def __getitem__(self, key):
+        return self.defaults[key]
+    
+    def __setitem__(self, key, value):
+        raise ValueError("Cannot set default value")
+    
+    def match(self, **kwargs):
+        mdict = {}
+        iskeys = self.skeys & set(kwargs.keys())
+        mdict.update({k: kwargs[k] for k in iskeys})
+        return mdict

@@ -19,7 +19,7 @@ _import_structure = {
     "state_dict": ["StateDict"],
     'check_types': ['check_function_input_types'],
     'timeout': ['Timeout'],
-    'class_wargs': ['get_class_defaults', 'XKwargs'],
+    'class_wargs': ['get_class_defaults', 'XKwargs', 'Input2Wargs'],
     'reloader': ['Reloader'],
     'dstruct': ['StrEnum'],
     'dict2attr': ['Dict2Attr'],
@@ -43,7 +43,7 @@ __all__ = [
     'StateDict',
     'check_function_input_types',
     'Timeout',
-    'get_class_defaults', 'XKwargs',
+    'get_class_defaults', 'XKwargs', 'Input2Wargs',
     'Reloader',
     'StrEnum',
     'Dict2Attr',
@@ -68,7 +68,7 @@ if TYPE_CHECKING:
     from .state_dict import StateDict
     from .check_types import check_function_input_types
     from .timeout import Timeout
-    from .class_wargs import get_class_defaults, XKwargs
+    from .class_wargs import get_class_defaults, XKwargs, Input2Wargs
     from .reloader import Reloader
     from .dstruct import StrEnum
     from .dict2attr import Dict2Attr
