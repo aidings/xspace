@@ -1,5 +1,5 @@
 
-class DatasetIndexWarpper:
+class DatasetIndexWrapper:
     def __init__(self, dataset):
         self.dataset = dataset
         self.didx = list(range(len(dataset)))
