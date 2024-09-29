@@ -78,7 +78,7 @@ class ZipFileReader:
     
     def __read_file(self, name: str):
         with self.zip_ref.open(name) as f:
-            return f
+            return f.read()
     
     def __next__(self):
         if self.__idx >= len(self.name_list):
