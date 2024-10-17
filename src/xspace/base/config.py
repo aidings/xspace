@@ -2088,11 +2088,16 @@ def _yaml_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
 
 
 class UserDict(ConfigDict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pattern = r'\$\{(\w+)\}'
+        self.__scan(self.__dict__['_fields'])
+    
     @classmethod
     def from_yaml(cls, conf_path):
         conf = {}
         if isinstance(conf_path, (str, os.PathLike)):
-            with open(conf_path, 'r') as f:
+            with open(conf_path, 'r', encoding='utf-8') as f:
                 conf = _yaml_load(f)
         elif isinstance(conf_path, dict):
             conf = conf_path
@@ -2105,7 +2110,7 @@ class UserDict(ConfigDict):
     def from_json(cls, conf_path):
         conf = {}
         if isinstance(conf_path, (str, os.PathLike)):
-            with open(conf_path, 'r') as f:
+            with open(conf_path, 'r', encoding='utf-8') as f:
                 conf = json.load(f)
         elif isinstance(conf_path, dict):
             conf = conf_path
@@ -2119,10 +2124,10 @@ class UserDict(ConfigDict):
         conf = {}
         if isinstance(conf_path, (str, os.PathLike)):
             if conf_path.endswith('.yaml'):
-              with open(conf_path, 'r') as f:
+              with open(conf_path, 'r', encoding='utf-8') as f:
                 conf = _yaml_load(f)
             elif conf_path.endswith('.json'):
-              with open(conf_path, 'r') as f:
+              with open(conf_path, 'r', encoding='utf-8') as f:
                 conf = json.load(f)
             else:
               raise RuntimeError(f'{conf_path} is bad input, please check it out.')
@@ -2132,3 +2137,57 @@ class UserDict(ConfigDict):
             raise RuntimeError(f'{conf_path} is bad input, please check it out. only support dict/json/yaml')
         
         return cls(conf)
+    
+    def __scan(self, kdict):
+        def _helper(_kdict):
+            if isinstance(_kdict, (dict, ConfigDict)):
+                for k, v in _kdict.items():
+                    if isinstance(v, str):
+                        match = re.findall(self.pattern, v)
+                        if match:
+                            mkey = match[0]
+                            _kdict[k] = _kdict[k].replace('${'+mkey+'}', self[mkey])
+                    elif isinstance(v, (dict, ConfigDict)):
+                        _helper(_kdict[k])
+        return _helper(kdict)
+
+import inspect
+from collections import OrderedDict
+
+class xconfig:
+    def __init__(self, module):
+        self.module = module
+        self.module.config = OrderedDict()
+        self.__get_inp(module)
+        
+    def __get_inp(self, module):
+        if hasattr(module, '__base__') and module != object:
+            self.__get_inp(module.__base__)
+        param_dict = {}
+        sig = inspect.signature(module.__init__)
+        for param in sig.parameters.values():
+            if param.name in ['self', 'args', 'kwargs']:
+                continue
+            if param.default != inspect.Signature.empty:
+                param_dict[param.name] = param.default
+            else:
+                param_dict[param.name] = 'REQUIRE'
+        self.module.config.update(param_dict)
+    
+    def __call__(self, *args, **kwargs):
+        obj = self.module(*args, **kwargs)
+        cfg_lst = list(obj.config)
+        for idx, arg in enumerate(args):
+            cfg_lst[idx] = arg
+        for key, val in kwargs.items():
+            if key in obj.config.keys():
+                obj.config[key] = val
+        obj.config = ConfigDict(obj.config)
+        obj.config.lock()
+        return obj
+        
+
+
+                    
+                    
+        

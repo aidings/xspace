@@ -13,7 +13,7 @@ _import_structure = {
     "color_print": ["info", "debug", "error", "print_rainbow", "print_table", "color_print"],
     "timer": ["Timer", "timer"],
     "markdown": ["Markdown"],
-    "config": ["ConfigDict", "UserDict"],
+    "config": ["ConfigDict", "UserDict", 'xconfig'],
     "image_tools": ["ImageTypeReader", "ImageFolderReader", "to_pil", "to_npy", "image2bytes"],
     "file_dirs": ["FileRoot", "RankFileWriter"],
     "state_dict": ["StateDict"],
@@ -37,7 +37,7 @@ __all__ = [
     'info', 'debug', 'error', 'print_rainbow', 'print_table', 'color_print',
     'Timer', 'timer',
     'Markdown',
-    'ConfigDict', 'UserDict',
+    'ConfigDict', 'UserDict', 'xconfig',
     'ImageTypeReader', 'ImageFolderReader', 'to_pil', 'to_npy', 'image2bytes',
     'FileRoot', 'RankFileWriter',
     'StateDict',
@@ -62,7 +62,7 @@ if TYPE_CHECKING:
     from .color_print import info, debug, error, print_rainbow, print_table, color_print
     from .timer import Timer, timer
     from .markdown import Markdown
-    from .config import ConfigDict, UserDict
+    from .config import ConfigDict, UserDict, xconfig
     from .image_tools import ImageTypeReader, ImageFolderReader, to_pil, to_npy, image2bytes
     from .file_dirs import FileRoot, RankFileWriter
     from .state_dict import StateDict
