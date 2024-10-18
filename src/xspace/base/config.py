@@ -2090,7 +2090,7 @@ def _yaml_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
 class UserDict(ConfigDict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pattern = r'\$\{(\w+)\}'
+        #self.pattern = r'\$\{(\w+)\}'
         self.__scan(self.__dict__['_fields'])
     
     @classmethod
@@ -2138,12 +2138,12 @@ class UserDict(ConfigDict):
         
         return cls(conf)
     
-    def __scan(self, kdict):
+    def __scan(self, kdict, pattern=r'\$\{(\w+)\}'):
         def _helper(_kdict):
             if isinstance(_kdict, (dict, ConfigDict)):
                 for k, v in _kdict.items():
                     if isinstance(v, str):
-                        match = re.findall(self.pattern, v)
+                        match = re.findall(pattern, v)
                         if match:
                             mkey = match[0]
                             _kdict[k] = _kdict[k].replace('${'+mkey+'}', self[mkey])
@@ -2185,8 +2185,10 @@ class xconfig:
         obj.config = ConfigDict(obj.config)
         obj.config.lock()
         return obj
-        
-
+    
+    def from_pretrained(self, conf_path, **kwargs):
+        obj = self.module.from_pretrained(conf_path, **kwargs)
+        return obj
 
                     
                     
