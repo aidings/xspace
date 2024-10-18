@@ -2166,7 +2166,7 @@ class xconfig:
         param_dict = {}
         sig = inspect.signature(module.__init__)
         for param in sig.parameters.values():
-            if param.name in ['self', 'args', 'kwargs']:
+            if param.name in ['self', 'args', 'kwargs','device']:
                 continue
             if param.default != inspect.Signature.empty:
                 param_dict[param.name] = param.default
