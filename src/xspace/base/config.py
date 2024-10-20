@@ -1515,7 +1515,7 @@ class ConfigDict:
       file_path = Path(file_path)
       if file_path.suffix == '.json':
           with file_path.open('w') as f:
-              json.dump(self.to_dict(), f, indent=4)
+              json.dump(self.to_dict(), f, ensure_ascii=False, indent=4)
       elif file_path.suffix == '.yaml':
           with file_path.open('w') as f:
               _yaml_dump(self.to_dict(), f)
@@ -2090,7 +2090,6 @@ def _yaml_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
 class UserDict(ConfigDict):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        #self.pattern = r'\$\{(\w+)\}'
         self.__scan(self.__dict__['_fields'])
     
     @classmethod
@@ -2098,7 +2097,7 @@ class UserDict(ConfigDict):
         conf = {}
         if isinstance(conf_path, (str, os.PathLike)):
             with open(conf_path, 'r', encoding='utf-8') as f:
-                conf = _yaml_load(f)
+                conf = yaml.unsafe_load(f)
         elif isinstance(conf_path, dict):
             conf = conf_path
         else:
@@ -2125,7 +2124,7 @@ class UserDict(ConfigDict):
         if isinstance(conf_path, (str, os.PathLike)):
             if conf_path.endswith('.yaml'):
               with open(conf_path, 'r', encoding='utf-8') as f:
-                conf = _yaml_load(f)
+                conf = yaml.unsafe_load(f)
             elif conf_path.endswith('.json'):
               with open(conf_path, 'r', encoding='utf-8') as f:
                 conf = json.load(f)
