@@ -2138,15 +2138,35 @@ class UserDict(ConfigDict):
         
         return cls(conf)
     
-    def __scan(self, kdict, pattern=r'\$\{(\w+)\}'):
+    def __scan(self, kdict, pattern=r'\${(.*?)}'):
         def _helper(_kdict):
             if isinstance(_kdict, (dict, ConfigDict)):
                 for k, v in _kdict.items():
                     if isinstance(v, str):
                         match = re.findall(pattern, v)
-                        if match:
+                        if len(match) == 1 and len(v) == len(match[0])+3:
                             mkey = match[0]
-                            _kdict[k] = _kdict[k].replace('${'+mkey+'}', self[mkey])
+                            try:
+                                del _kdict[k]
+                                if 'env:' in mkey or 'ENV:' in mkey:
+                                    ekey = mkey.split(':')[1]
+                                    _kdict[k] = os.environ.get(ekey, '')
+                                else:
+                                    _kdict[k] = self[mkey]
+                            except KeyError:
+                                raise KeyError(f'Key {mkey} not found in config')
+                        else:
+                            for mkey in match:
+                                if 'env:' in mkey or 'ENV:' in mkey:
+                                    ekey = mkey.split(':')[1]
+                                    _kdict[k] = _kdict[k].replace('${'+mkey+'}', os.environ.get(ekey, ''))
+                                else:
+                                    try:
+                                        value = str(self[mkey])
+                                        _kdict[k] = _kdict[k].replace('${'+mkey+'}', value)
+                                    except KeyError:
+                                        raise KeyError(f'Key {mkey} not found in config')
+                                    
                     elif isinstance(v, (dict, ConfigDict)):
                         _helper(_kdict[k])
         return _helper(kdict)
@@ -2189,7 +2209,3 @@ class xconfig:
     def from_pretrained(self, conf_path, **kwargs):
         obj = self.module.from_pretrained(conf_path, **kwargs)
         return obj
-
-                    
-                    
-        
