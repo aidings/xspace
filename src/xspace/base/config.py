@@ -2178,6 +2178,7 @@ class xconfig:
         self.module = module
         self.module.config = OrderedDict()
         self.__get_inp(module)
+        self.module.config = ConfigDict(self.module.config)
         
     def __get_inp(self, module):
         if hasattr(module, '__base__') and module != object:
