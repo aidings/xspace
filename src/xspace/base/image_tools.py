@@ -9,20 +9,20 @@ import torchvision.transforms as TF
 from .dstruct import StrEnum
 
 
-def to_pil(img_buf: bytes|Path|str|np.ndarray|Image.Image|torch.Tensor):
+def to_pil(img_buf: bytes|Path|str|np.ndarray|Image.Image|torch.Tensor, mode:str = 'RGB'):
     if isinstance(img_buf, bytes):
         image = iio.imread(img_buf)
-        image = Image.fromarray(image)
+        image = Image.fromarray(image).convert(mode)
     elif isinstance(img_buf, (Path, str)) and Path(img_buf).exists():
         image = Image.open(img_buf)
-        image = image.convert('RGB')
+        image = image.convert(mode)
     elif isinstance(img_buf, np.ndarray):
-        image = Image.fromarray(img_buf)
+        image = Image.fromarray(img_buf).convert(mode)
     elif isinstance(img_buf, Image.Image):
-        image = img_buf
+        image = img_buf.convert(mode)
     elif isinstance(img_buf, torch.Tensor):
         if len(img_buf.shape) == 3:
-            image = TF.ToPILImage()(img_buf)
+            image = TF.ToPILImage()(img_buf).convert(mode)
         else:
             image = None
             raise RuntimeError(f'Input Image error, please check out {img_buf}') 
