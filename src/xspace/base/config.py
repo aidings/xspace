@@ -2195,14 +2195,16 @@ class xconfig:
         self.module.config.update(param_dict)
     
     def __call__(self, *args, **kwargs):
-        obj = self.module(*args, **kwargs)
-        cfg_lst = list(obj.config)
+        cfg_lst = list(self.module.config)
         for idx, arg in enumerate(args):
             cfg_lst[idx] = arg
         for key, val in kwargs.items():
-            if key in obj.config.keys():
-                obj.config[key] = val
-        obj.config = ConfigDict(obj.config)
+            if key in self.module.config.keys():
+                self.module.config[key] = val
+
+        obj = self.module(**self.module.config.to_dict())
+        
+        obj.config = ConfigDict(self.module.config)
         obj.config.lock()
         return obj
     
