@@ -6,19 +6,19 @@ from xspace._version import __version__
 
 
 _import_structure = {
-    "csv_evalue_dataset": ["CSVEvalueDataset"],
     "index_wraper": ["DatasetIndexWrapper"],
+    "evalue_dataset": ["EvalueDataset"]
 }
 
 __all__ = [
-    "CSVEvalueDataset",
     "DatasetIndexWrapper",
+    "EvalueDataset"
 ]
 
 # Direct imports for type-checking
 if TYPE_CHECKING:
-    from .csv_evalue_dataset import CSVEvalueDataset
     from .index_wraper import DatasetIndexWrapper
+    from .evalue_dataset import EvalueDataset
 else:
     sys.modules[__name__] = LazyImporter(
         __name__,
