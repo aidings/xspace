@@ -1,5 +1,6 @@
 import inspect
-from types import MethodType, List
+from types import MethodType
+from typing import List
 import csv
 import json
 
