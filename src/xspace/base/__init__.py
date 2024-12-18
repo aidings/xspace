@@ -26,7 +26,8 @@ _import_structure = {
     'xnote': ['XNote', 'Image', 'XNoteRow', 'XNoteCol'],
     'product_parameter': ['ProductParameter'],
     'extract_bracket': ['ExtractBrackets'],
-    'returns': ['Returns']
+    'returns': ['Returns'],
+    'list_dict': ['ListDict']
 }
 
 __all__ = [
@@ -50,7 +51,8 @@ __all__ = [
     'XNote', 'Image', 'XNoteRow', 'XNoteCol',
     'ProductParameter',
     'ExtractBrackets',
-    'Returns'
+    'Returns',
+    'ListDict'
 ]
 
 # Direct imports for type-checking
@@ -76,6 +78,7 @@ if TYPE_CHECKING:
     from .product_parameter import ProductParameter
     from .extract_bracket import ExtractBrackets
     from .returns import Returns
+    from .list_dict import ListDict
 else:
     sys.modules[__name__] = LazyImporter(
         __name__,
