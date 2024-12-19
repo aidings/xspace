@@ -50,9 +50,9 @@ class ListDict:
     def set_key(self, key: str):
         list_dict = dcp(self.list_dict) 
         kick_dict = {}
-        for line_dict in list_dict.keys():
-            value = line_dict.pop(key)
-            kick_dict[value] = line_dict
+        for kdict in list_dict.keys():
+            value = kdict.pop(key)
+            kick_dict[value] = kdict
         
         self.kick_dict = kick_dict
 
