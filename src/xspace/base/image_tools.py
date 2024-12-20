@@ -89,7 +89,7 @@ class ImageFolderReader:
         return self.read_func(self.img_dir[idx])
 
 def image2bytes(img_buf: str|Path|Image.Image):
-    if isinstance(img_buf, (Path, str)):
+    if isinstance(img_buf, (str, Path)):
         try:
             return open(img_buf, 'rb').read()
         except:
