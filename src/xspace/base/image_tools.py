@@ -54,7 +54,7 @@ def to_npy(img_buf: bytes|Path|str|np.ndarray|Image.Image|torch.Tensor):
         image = None
         raise ValueError('Error: Not support this type image buffer(byte, str, np.ndarry, PIL.Image)')
     
-    if image.shape[2] == 4:
+    if len(image.shape) > 2 and image.shape[2] == 4:
         color = image[:, :, 0:3].astype(np.float32)
         alpha = image[:, :, 3:4].astype(np.float32) / 255.0
         y = color * alpha + 255.0 * (1.0 - alpha)
