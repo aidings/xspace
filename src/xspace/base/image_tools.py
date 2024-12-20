@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 import imageio.v3 as iio
 from io import BytesIO
+import base64
 import torch
 import torchvision.transforms as TF
 from .dstruct import StrEnum
@@ -89,7 +90,10 @@ class ImageFolderReader:
 
 def image2bytes(img_buf: str|Path|Image.Image):
     if isinstance(img_buf, (Path, str)):
-        return open(img_buf, 'rb').read()
+        try:
+            return open(img_buf, 'rb').read()
+        except:
+            return base64.b64decode(img_buf)
     elif isinstance(img_buf, Image.Image):
         bytesIO = BytesIO()
         img_buf.save(bytesIO, format='PNG')
