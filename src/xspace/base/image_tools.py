@@ -8,28 +8,31 @@ import base64
 import torch
 import torchvision.transforms as TF
 from .dstruct import StrEnum
+from typing import List
 
 
 def to_pil(img_buf: bytes|Path|str|np.ndarray|Image.Image|torch.Tensor, mode:str = 'RGB'):
-    if isinstance(img_buf, bytes):
+    if isinstance(img_buf, bytes) or isinstance(img_buf, str) and img_buf.startswith('http'):
         image = iio.imread(img_buf)
-        image = Image.fromarray(image).convert(mode)
+        image = Image.fromarray(image)
     elif isinstance(img_buf, (Path, str)) and Path(img_buf).exists():
         image = Image.open(img_buf)
-        image = image.convert(mode)
     elif isinstance(img_buf, np.ndarray):
-        image = Image.fromarray(img_buf).convert(mode)
+        image = Image.fromarray(img_buf)
     elif isinstance(img_buf, Image.Image):
-        image = img_buf.convert(mode)
+        image = img_buf
     elif isinstance(img_buf, torch.Tensor):
         if len(img_buf.shape) == 3:
-            image = TF.ToPILImage()(img_buf).convert(mode)
+            image = TF.ToPILImage()(img_buf)
         else:
             image = None
             raise RuntimeError(f'Input Image error, please check out {img_buf}') 
     else:
         image = None
         raise RuntimeError(f'Input Image error, please check out {img_buf}')
+    
+    if mode:
+        image = image.convert(mode)
 
     return image
 
@@ -100,3 +103,128 @@ def image2bytes(img_buf: str|Path|Image.Image):
         return bytesIO.getvalue()
     else:
         raise ValueError('Error: Not support this type image buffer(byte, str, PIL.Image)')
+
+
+import numpy as np
+from PIL import Image, ImageDraw 
+
+
+class ImageMasker(object):
+    def __init__(self, width, height, label=0, canvas=None):
+        if canvas is not None:
+            self.canvas = canvas
+        else:
+            self.canvas = Image.new('L', (width, height), label)
+        self.draw = ImageDraw.Draw(self.canvas)
+
+    def rect(self, left, top, right, bottom, label=255, width=1):
+        self.draw.rectangle((left, top, right, bottom), fill=label, width=width)
+    
+    def save(self, file_name):
+        self.canvas.save(file_name)
+    
+    def circle(self, x, y, radius, label=255, width=1):
+        self.draw.ellipse((x-radius, y-radius, x+radius, y+radius), fill=label, width=width)
+    
+    def polygon(self, points, label=255, width=1):
+        self.draw.polygon(points, fill=label, width=width)
+    
+    def line(self, x1, y1, x2, y2, label=255, width=1):
+        self.draw.line((x1, y1, x2, y2), fill=label, width=width)
+    
+    def image(self, imgbuf, tl=(0,0)):
+        image = to_pil(imgbuf, mode='L')
+        self.canvas.paste(image, tl)
+
+    @classmethod
+    def from_file(cls, imgbuf):
+        image = to_pil(imgbuf, mode='L')
+        return cls(image.size[0], image.size[1], canvas=image)
+    
+    def to_npy(self):
+        return np.array(self.canvas)
+    
+    def show_mask(self, image):
+        mask = np.array(self.canvas, dtype=np.float32)
+        if mask.max() > 1:
+            mask /= 255
+        mask = mask[:, :, np.newaxis]
+        image_float = np.array(image, dtype=np.float32)
+        result = image_float * (1 - mask) + image_float * mask * 0.7
+        result = result.clip(0, 255)
+        return Image.fromarray(result.astype(np.uint8))
+
+
+class ImagePaster:
+    def __init__(self, width, height, color=(255, 255, 255)):
+        if len(color) == 3:
+            self.bg = Image.new('RGB', (width, height), color)
+        elif len(color) == 1:
+            self.bg = Image.new('L', (width, height), color)
+        else:
+            raise ValueError('Error: Not support this color')
+    
+    def paste(self, imgbuf, tl=(0,0)):
+        image = to_pil(imgbuf, mode=self.bg.mode)
+        self.bg.paste(image, tl)
+        return self.bg
+    
+    @classmethod
+    def from_file(cls, imgbufs:List = [], row=1, color=255, img_width=None, resample=Image.BILINEAR):
+        """ create new image with images from imgbufs
+
+        Args:
+            imgbufs (List, optional): lot of image buffer. Defaults to [].
+            row (int, optional): canvas row number. Defaults to 1.
+            color (int, optional): background color. Defaults to 255.
+            img_width (int, optional): same width for all images. Defaults to None.
+            resample (int, optional): resize method. Defaults to Image.BILINEAR.
+
+        Returns:
+            ImagePaster: a new image with images from imgbufs
+        """
+        nimg = len(imgbufs)
+        assert nimg > 0, 'Error: No image input'
+        imgs = []
+        whr = None
+
+        # makesure all image has same width/height ratio
+        # and resize all image to same width
+        for imgbuf in imgbufs:
+            img = to_pil(imgbuf, mode=None)
+            if whr is None:
+                whr = img.size[0] / img.size[1]
+                if img_width is None:
+                    img_width = img.size[0]
+            else:
+                assert img.size[0] / img.size[1] == whr, 'Error: Image width/height ratio not match'
+            
+            img = img.resize((img_width, int(img_width / img.size[0] * img.size[1])), resample=resample)
+            imgs.append(img)
+        
+        # split images to row x col
+        images = []
+        col = int(np.ceil(nimg / row))
+        x, y = 0, 0
+        for i in range(row): 
+            img_row = []
+            for j in range(col):
+                idx = i * col + j
+                img_row.append((imgs[idx], (x, y)))
+                x += imgs[idx].size[0]
+            y += imgs[idx].size[1]
+            images.append(img_row)
+        
+        # create new image with max width and height
+        width = max([len(row) for row in images]) * images[0].size[0]
+        height = col * images[0].size[1]
+
+        # create canvas and paste images
+        obj = cls(width, height, color=color)
+        for row in images:
+            for col in row:
+                obj.paste(row[0], tl=col[1])
+        
+        return obj
+
+        

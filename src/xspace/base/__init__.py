@@ -14,7 +14,7 @@ _import_structure = {
     "timer": ["Timer", "timer"],
     "markdown": ["Markdown"],
     "config": ["ConfigDict", "UserDict", 'xconfig'],
-    "image_tools": ["ImageTypeReader", "ImageFolderReader", "to_pil", "to_npy", "image2bytes"],
+    "image_tools": ["ImageTypeReader", "ImageFolderReader", "to_pil", "to_npy", "image2bytes", "ImageMasker", "ImagePaster"],
     "file_dirs": ["FileRoot", "RankFileWriter"],
     "state_dict": ["StateDict"],
     'check_types': ['check_function_input_types'],
@@ -39,7 +39,7 @@ __all__ = [
     'Timer', 'timer',
     'Markdown',
     'ConfigDict', 'UserDict', 'xconfig',
-    'ImageTypeReader', 'ImageFolderReader', 'to_pil', 'to_npy', 'image2bytes',
+    'ImageTypeReader', 'ImageFolderReader', 'to_pil', 'to_npy', 'image2bytes', 'ImageMasker', 'ImagePaster',
     'FileRoot', 'RankFileWriter',
     'StateDict',
     'check_function_input_types',
@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from .timer import Timer, timer
     from .markdown import Markdown
     from .config import ConfigDict, UserDict, xconfig
-    from .image_tools import ImageTypeReader, ImageFolderReader, to_pil, to_npy, image2bytes
+    from .image_tools import ImageTypeReader, ImageFolderReader, to_pil, to_npy, image2bytes, ImageMasker, ImagePaster
     from .file_dirs import FileRoot, RankFileWriter
     from .state_dict import StateDict
     from .check_types import check_function_input_types
