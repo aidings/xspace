@@ -9,6 +9,7 @@ import torch
 import torchvision.transforms as TF
 from .dstruct import StrEnum
 from typing import List
+from .colors import COLOR_64
 
 
 def to_pil(img_buf: bytes|Path|str|np.ndarray|Image.Image|torch.Tensor, mode:str = 'RGB'):
@@ -226,5 +227,57 @@ class ImagePaster:
                 obj.paste(row[0], tl=col[1])
         
         return obj
+
+from dataclasses import dataclass
+
+@dataclass
+class ImageWithMask:
+    image: Image.Image
+    mask: Image.Image
+
+    def __post_init__(self):
+        assert self.image.size == self.mask.size and \
+            self.image.mode == 'RGB' and \
+                self.mask.mode == 'L', 'Error: Image and Mask size or mode not match'
+    
+    def concat(self):
+        image = np.array(self.image)
+        mask = np.array(self.mask)
+        mask = mask[:, :, np.newaxis]
+        image_with_mask = np.concatenate((image, mask), axis=2)
+        return image_with_mask
+    
+    def resize(self, size):
+        image = self.image.resize(size, resample=Image.Resampling.LANCZOS)
+        mask = self.mask.resize(size, resample=Image.Resampling.NEAREST)
+
+        return ImageWithMask(image, mask)
+    
+    def show(self):
+        nc = len(COLOR_64)
+        unique_values = set(self.mask.getdata())
+        if len(unique_values) > nc:
+            raise ValueError(f"Mask contains more than {nc} unique values")
+
+        # 创建一个空白的彩色图像
+        colored_mask = Image.new('RGB', self.mask.size)
+
+        # 根据mask的值填充颜色
+        draw = ImageDraw.Draw(colored_mask)
+        for value in unique_values:
+            if value == 0:  # 跳过背景
+                continue
+            color = self.colors[value % nc]
+            draw.bitmap((0, 0), self.mask, fill=color)
+
+        # 将彩色mask与原图像混合
+        alpha = 0.5  # 控制透明度
+        output_image = Image.blend(self.image, colored_mask, alpha)
+
+        return output_image 
+    
+    def blend(self, image):
+        return self.image.copy().paste(image, mask=self.mask)
+        
 
         

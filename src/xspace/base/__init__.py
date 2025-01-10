@@ -14,7 +14,7 @@ _import_structure = {
     "timer": ["Timer", "timer"],
     "markdown": ["Markdown"],
     "config": ["ConfigDict", "UserDict", 'xconfig'],
-    "image_tools": ["ImageTypeReader", "ImageFolderReader", "to_pil", "to_npy", "image2bytes", "ImageMasker", "ImagePaster"],
+    "image_tools": ["ImageTypeReader", "ImageFolderReader", "to_pil", "to_npy", "image2bytes", "ImageMasker", "ImagePaster", "ImageWithMask"],
     "file_dirs": ["FileRoot", "RankFileWriter"],
     "state_dict": ["StateDict"],
     'check_types': ['check_function_input_types'],
@@ -27,7 +27,8 @@ _import_structure = {
     'product_parameter': ['ProductParameter'],
     'extract_bracket': ['ExtractBrackets'],
     'returns': ['Returns'],
-    'list_dict': ['ListDict']
+    'list_dict': ['ListDict'],
+    'colors': ['Color64', 'COLOR_64']
 }
 
 __all__ = [
@@ -39,7 +40,7 @@ __all__ = [
     'Timer', 'timer',
     'Markdown',
     'ConfigDict', 'UserDict', 'xconfig',
-    'ImageTypeReader', 'ImageFolderReader', 'to_pil', 'to_npy', 'image2bytes', 'ImageMasker', 'ImagePaster',
+    'ImageTypeReader', 'ImageFolderReader', 'to_pil', 'to_npy', 'image2bytes', 'ImageMasker', 'ImagePaster', 'ImageWithMask',
     'FileRoot', 'RankFileWriter',
     'StateDict',
     'check_function_input_types',
@@ -52,7 +53,8 @@ __all__ = [
     'ProductParameter',
     'ExtractBrackets',
     'Returns',
-    'ListDict'
+    'ListDict',
+    'Color64', 'COLOR_64'
 ]
 
 # Direct imports for type-checking
@@ -65,7 +67,7 @@ if TYPE_CHECKING:
     from .timer import Timer, timer
     from .markdown import Markdown
     from .config import ConfigDict, UserDict, xconfig
-    from .image_tools import ImageTypeReader, ImageFolderReader, to_pil, to_npy, image2bytes, ImageMasker, ImagePaster
+    from .image_tools import ImageTypeReader, ImageFolderReader, to_pil, to_npy, image2bytes, ImageMasker, ImagePaster, ImageWithMask
     from .file_dirs import FileRoot, RankFileWriter
     from .state_dict import StateDict
     from .check_types import check_function_input_types
@@ -79,6 +81,7 @@ if TYPE_CHECKING:
     from .extract_bracket import ExtractBrackets
     from .returns import Returns
     from .list_dict import ListDict
+    from .colors import Color64, COLOR_64
 else:
     sys.modules[__name__] = LazyImporter(
         __name__,
