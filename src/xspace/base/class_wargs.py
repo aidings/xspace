@@ -117,7 +117,7 @@ class DefineInputs:
     def __init__(self, names:List[str]):
         self.__kname = names
     
-    def preproc(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs):
         params = {}
         
         for name, value in zip(self.__kname[:len(args)], args):
