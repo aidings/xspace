@@ -5,6 +5,7 @@ from loguru import logger
 from .config import ConfigDict
 
 from pathlib import Path
+from typing import List
 from copy import deepcopy as dcopy
 from .dict2attr import Dict2Attr
 
