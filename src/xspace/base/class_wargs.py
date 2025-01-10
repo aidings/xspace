@@ -6,6 +6,7 @@ from .config import ConfigDict
 
 from pathlib import Path
 from copy import deepcopy as dcopy
+from .dict2attr import Dict2Attr
 
 class XKwargs(dict):
     def __init__(self, **kwargs):
@@ -108,4 +109,20 @@ class Input2Wargs:
         mdict = {}
         iskeys = self.skeys & set(kwargs.keys())
         mdict.update({k: kwargs[k] for k in iskeys})
-        return mdict
+        return 
+
+
+class DefineInputs:
+    def __init__(self, names:List[str]):
+        self.__kname = names
+    
+    def preproc(self, *args, **kwargs):
+        params = {}
+        
+        for name, value in zip(self.__kname[:len(args)], args):
+            params[name] = value
+
+        params.update(kwargs)
+
+        return Dict2Attr(params)
+
