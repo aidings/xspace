@@ -110,7 +110,7 @@ class Input2Wargs:
         mdict = {}
         iskeys = self.skeys & set(kwargs.keys())
         mdict.update({k: kwargs[k] for k in iskeys})
-        return 
+        return mdict
 
 
 class DefineInputs:
