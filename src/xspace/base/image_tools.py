@@ -10,6 +10,7 @@ import torchvision.transforms as TF
 from .dstruct import StrEnum
 from typing import List
 from .colors import COLOR_64
+from collections import OrderedDict
 
 
 def to_pil(img_buf: bytes|Path|str|np.ndarray|Image.Image|torch.Tensor, mode:str = 'RGB'):
@@ -228,21 +229,46 @@ class ImagePaster:
         
         return obj
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass
 class ImageWithMask:
     image: Image.Image
     mask: Image.Image
+    label: List[str] = field(default_factory=list) 
 
     def __post_init__(self):
         assert self.image.size == self.mask.size and \
             self.image.mode == 'RGB' and \
                 self.mask.mode == 'L', 'Error: Image and Mask size or mode not match'
-    
+
+        nc = len(set(self.mask.getdata()))
+        if len(self.label) == 0:
+            self.label = [f'{i}' for i in range(1, nc)]
+        else:
+            if nc == len(self.label):
+                self.label = self.label[1:]
+            elif nc == len(self.label) + 1:
+                pass
+            else:
+                raise ValueError('Error: Label number not match')
+            
+    @classmethod
+    def from_class(cls, image: Image.Image, mask: Image.Image, labels: List[str]):
+        lsets = OrderedDict()
+        imask = np.array(mask)
+        
+        for idx, label in enumerate(labels):
+            if label not in lsets:
+                lsets[label] = idx
+            else:
+                imask[imask == idx] = lsets[label]
+        
+        return cls(image, Image.fromarray(imask), list(lsets.keys()))
+         
     def concat(self):
-        image = np.array(self.image)
-        mask = np.array(self.mask)
+        image = np.asarray(self.image)
+        mask = np.asarray(self.mask)
         mask = mask[:, :, np.newaxis]
         image_with_mask = np.concatenate((image, mask), axis=2)
         return image_with_mask
@@ -251,9 +277,9 @@ class ImageWithMask:
         image = self.image.resize(size, resample=Image.Resampling.LANCZOS)
         mask = self.mask.resize(size, resample=Image.Resampling.NEAREST)
 
-        return ImageWithMask(image, mask)
+        return ImageWithMask(image, mask, self.label)
     
-    def show(self):
+    def show(self, alpha=0.5):
         nc = len(COLOR_64)
         unique_values = set(self.mask.getdata())
         if len(unique_values) > nc:
@@ -264,17 +290,20 @@ class ImageWithMask:
 
         # 根据mask的值填充颜色
         draw = ImageDraw.Draw(colored_mask)
+        imask = np.asarray(self.mask)
+        colors = []
         for value in unique_values:
             if value == 0:  # 跳过背景
                 continue
-            color = self.colors[value % nc]
-            draw.bitmap((0, 0), self.mask, fill=color)
+            color = COLOR_64[value % nc]
+            mask = ((imask == value) * 255).astype(np.uint8)
+            draw.bitmap((0, 0), Image.fromarray(mask), fill=color)
+            colors.append(color)
 
         # 将彩色mask与原图像混合
-        alpha = 0.5  # 控制透明度
         output_image = Image.blend(self.image, colored_mask, alpha)
-
-        return output_image 
+        
+        return dict(show=output_image, label_color=dict(zip(self.label, colors)), colored_mask=colored_mask)
     
     def blend(self, image):
         return self.image.copy().paste(image, mask=self.mask)
