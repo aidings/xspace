@@ -13,7 +13,7 @@ class XVideoReader:
         except Exception as e:
             raise RuntimeError(e)
 
-        self.interval = int(self.capture.get_avg_fps() * interval)
+        self.interval = int(self.capture.get_avg_fps() * interval) if interval > 0 else 1
         self.nframe = len(self.capture)
         self.fidxs = self._gen_seq_idx()
         self.transforms = self._transforms_with_idxs if with_idxs else self._transforms
