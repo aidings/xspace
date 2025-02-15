@@ -8,7 +8,7 @@ from .color_print import print_table, Table_Theme
 class ObjectFromConfig:
     def __init__(self, config, pbar_show=True, **kwargs):
         assert 'objects' in config.keys(), 'config must have key "objects"'
-        self.okeys = [f'__{key}' for key in kwargs.keys()]
+        self.okeys = [f'_{key}_' for key in kwargs.keys()]
         self.config = dcp(config['objects'])
         self.objs = {}
         self.objs.update(kwargs)
