@@ -23,13 +23,18 @@ class ObjectFromConfig:
             value = value[key]
         return not isinstance(value, dict)
     
+    @staticmethod
+    def match_value(value):
+        return isinstance(value, str) and value[0] == '_' and value[-1] == '_'
+    
     def __proc_cited_objs(self, value):
         ivalue = []
         def _proc_strs(val):
-            obj = val 
-            if isinstance(val, str) and val.startswith('__'):
-                if val[2:] in self.objs.keys():
-                    obj = self.objs[val[2:]]
+            obj = val
+            if self.match_value(val):
+                name = val[1:-1]
+                if name in self.objs.keys():
+                    obj = self.objs[name]
                 else:
                     obj = self.__objecter(val)
             return obj
@@ -52,11 +57,13 @@ class ObjectFromConfig:
                 conf = conf[name]
             except:
                 conf = conf[int(name)]
-            if name.startswith('__'):
-                knames.append(name[2:])
-        iname = names[-1][2:]
+            
+            if self.match_value(name):
+                mname = name[1:-1]
+                knames.append(mname)
+        iname = names[-1][1:-1]
         knames.append(iname)
-        is_top = len(names) == 1 and names[0].startswith('__') 
+        is_top = len(names) == 1 and self.match_value(names[0])
         if is_top and iname in self.objs.keys():
             return self.objs[iname]
             
@@ -69,7 +76,7 @@ class ObjectFromConfig:
             # knames.append('module')
             conf[iname] = object_from_config(conf.pop(names[-1]))
             if is_top:
-                self.objs[names[0][2:]] = conf[iname]
+                self.objs[names[0][1:-1]] = conf[iname]
         if is_top: 
             return self.objs[iname]
 
@@ -83,7 +90,7 @@ class ObjectFromConfig:
             currPath = f'{path}.{k}' if path else k
             
             # Check whether the key contains two consecutive underlines anywhere within its name
-            if any([str(i).startswith('__') for i in [k, currPath]]):
+            if any([self.match_value(str(i)) for i in [k, currPath]]):
                 results.append(currPath)
                         
             # If we are allowed to look inside nested dictionaries, do so
@@ -94,7 +101,7 @@ class ObjectFromConfig:
                     if isinstance(iv, dict):
                         results.extend(self.__parse(iv, f'{currPath}.{ik}'))
         
-        results = [p for p in results if '__' in p.split('.')[-1]]
+        results = [p for p in results if self.match_value(p.split('.')[-1])]
         results = sorted(results, key=lambda x:len(x.split('.'))+1, reverse=True)
         
         return results
@@ -112,8 +119,8 @@ class ObjectFromConfig:
         
         show_keys = set()
         for key in keys:
-            ikey = key.replace('__', '')
-            show_keys.add(ikey.split('.')[-1])
+            ikey = key.split('.')[-1]
+            show_keys.add(ikey[1:-1])
         
         show_keys = list(show_keys) 
         if pbar_show:
@@ -130,7 +137,7 @@ class ObjectFromConfig:
 
         pbar = tqdm(total=len(keys), desc='objecting', colour='green', disable=not pbar_show)
         for key in keys: 
-            ikey = key.replace('__', '')
+            ikey = key[1:-1]
             pbar.set_postfix_str(ikey)
             self.__objecter(key)
             pbar.update()
@@ -150,10 +157,10 @@ class ObjectFromConfig:
                 return level
             levels = [level]
             for key in obj['params'].keys():
-                if key.startswith('__'):
+                if self.match_value(key):
                     # 2: 列表， 1: 字符串
                     value = obj['params'][key]
-                    if isinstance(value, str) and value.startswith('__'):
+                    if self.match_value(value):
                         ilevel = self.__sort_keys(value, level+1)
                         levels.append(ilevel)
                     elif isinstance(value, (list, tuple)):
@@ -171,7 +178,7 @@ class ObjectFromConfig:
             
         if isinstance(obj, dict):
             return level
-        elif isinstance(obj, str) and obj.startswith('__'):
+        elif self.match_value(obj):
             level = self.__sort_keys(obj, level+1)
         elif isinstance(obj, (list, tuple)):
             levels = [level]
