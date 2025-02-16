@@ -14,6 +14,18 @@ from collections import OrderedDict
 
 
 def to_pil(img_buf: bytes|Path|str|np.ndarray|Image.Image|torch.Tensor, mode:str = 'RGB'):
+    """ Convert image buffer to PIL image.
+
+    Args:
+        img_buf (bytes | Path | str | np.ndarray | Image.Image | torch.Tensor): input image buffer.
+        mode (str, optional): image mode. Defaults to 'RGB'.
+
+    Raises:
+        RuntimeError: _input image buffer error, please check out {img_buf}_
+
+    Returns:
+        PIL.Image: output image.
+    """
     if isinstance(img_buf, bytes) or isinstance(img_buf, str) and img_buf.startswith('http'):
         image = iio.imread(img_buf)
         image = Image.fromarray(image)
@@ -72,12 +84,20 @@ class ImageTypeReader(StrEnum):
     STR = 'str'
 
 class ImageFolderReader:
+    """ Read all the images in the folder.
+
+        Args:
+            file_root (str): the root of image folder.
+            exts (list, optional): the image's ext. Defaults to ['.jpg', '.png', '.bmp', '.jpeg'].
+            read_type (ImageTypeReader, optional): read to PIL formart or numpy format. Defaults to ImageTypeReader.PIL.
+    """
     __read_dict = {
         ImageTypeReader.PIL: to_pil,
         ImageTypeReader.NPY: to_npy,
         ImageTypeReader.STR: lambda x: x
     }
-    def __init__(self, file_root, exts = ['.jpg', '.png', '.bmp', '.jpeg'], read_type:ImageTypeReader = ImageTypeReader.PIL):
+    def __init__(self, file_root, exts = ['.jpg', '.png', '.bmp', '.jpeg', '.webp'], read_type:ImageTypeReader = ImageTypeReader.PIL):
+        
         self.img_dir = []
         self.exts = []
 
@@ -94,11 +114,22 @@ class ImageFolderReader:
         return self.read_func(self.img_dir[idx])
 
 def image2bytes(img_buf: str|Path|Image.Image):
+    """ Convert image buffer to bytes.
+    Args:
+        img_buf (str | Path | Image.Image): input image buffer.
+    Raises:
+        ValueError: _input image buffer error, please check out {img_buf}_
+    Returns:
+        bytes: output image buffer.
+    """
+
     if isinstance(img_buf, (str, Path)):
         try:
             return open(img_buf, 'rb').read()
-        except:
+        except FileNotFoundError:
             return base64.b64decode(img_buf)
+        finally:
+            raise ValueError('Error: Not support this type image buffer(byte, str, PIL.Image)')
     elif isinstance(img_buf, Image.Image):
         bytesIO = BytesIO()
         img_buf.save(bytesIO, format='PNG')
@@ -112,7 +143,16 @@ from PIL import Image, ImageDraw
 
 
 class ImageMasker(object):
+    """ create a new mask image.
+
+        Args:
+            width (int): the canvas's width
+            height (int): the canvas's height
+            label (int, optional): the canvas's pixel. Defaults to 0.
+            canvas (PIL.Image, optional): a canvas from outside. Defaults to None.
+    """
     def __init__(self, width, height, label=0, canvas=None):
+        
         if canvas is not None:
             self.canvas = canvas
         else:
@@ -147,6 +187,12 @@ class ImageMasker(object):
         return np.array(self.canvas)
     
     def show_mask(self, image):
+        """ show mask on image.
+        Args:
+            image (PIL.Image): input image.
+        Returns:
+            PIL.Image: output image.
+        """
         mask = np.array(self.canvas, dtype=np.float32)
         if mask.max() > 1:
             mask /= 255
@@ -158,6 +204,12 @@ class ImageMasker(object):
 
 
 class ImagePaster:
+    """ create a new image with background color.
+        Args:
+            width (int): the canvas's width
+            height (int): the canvas's height
+            color (int, optional): the canvas's pixel. Defaults to (255,255,255).
+    """
     def __init__(self, width, height, color=(255, 255, 255)):
         if len(color) == 3:
             self.bg = Image.new('RGB', (width, height), color)
@@ -233,8 +285,8 @@ from dataclasses import dataclass, field
 
 @dataclass
 class ImageWithMask:
-    image: Image.Image
-    mask: Image.Image
+    image: Image.Image # RGB mode
+    mask: Image.Image  # L mode and same size with image, 0 is background, 1 is first label, 2 is second label, ...
     label: List[str] = field(default_factory=list) 
 
     def __post_init__(self):
@@ -255,6 +307,13 @@ class ImageWithMask:
             
     @classmethod
     def from_class(cls, image: Image.Image, mask: Image.Image, labels: List[str]):
+        """ create image with mask and labels
+
+        Args:
+            image (Image.Image): the original image
+            mask (Image.Image): mask image for original image, 0 is background, 1 is first label, 2 is second label,...
+            labels (List[str]): string labels for mask, just like ['bacground', 'person', 'car',...], index 0 stand for background, ...
+        """
         lsets = OrderedDict()
         imask = np.array(mask)
         
@@ -267,6 +326,10 @@ class ImageWithMask:
         return cls(image, Image.fromarray(imask), list(lsets.keys()))
          
     def concat(self):
+        """ concat image and mask to one image
+        Returns:
+            np.ndarray: image with mask, shape is (H, W, 4)
+        """
         image = np.asarray(self.image)
         mask = np.asarray(self.mask)
         mask = mask[:, :, np.newaxis]
@@ -274,12 +337,25 @@ class ImageWithMask:
         return image_with_mask
     
     def resize(self, size):
+        """ resize image and mask to same size
+        Args:
+            size (tuple): (width, height)
+        Returns:
+            ImageWithMask: resized image and mask
+        """
         image = self.image.resize(size, resample=Image.Resampling.LANCZOS)
         mask = self.mask.resize(size, resample=Image.Resampling.NEAREST)
 
         return ImageWithMask(image, mask, self.label)
     
     def show(self, alpha=0.5):
+        """ show image with mask
+        Args:
+            alpha (float, optional): mask alpha. Defaults to 0.5.
+        Returns:
+            Image.Image: image with mask
+        """
+
         nc = len(COLOR_64)
         unique_values = set(self.mask.getdata())
         if len(unique_values) > nc:
@@ -306,6 +382,11 @@ class ImageWithMask:
         return dict(show=output_image, label_color=dict(zip(self.label, colors)), colored_mask=colored_mask)
     
     def blend(self, image):
+        """ blend image with mask
+
+        Args:
+            image (PIL.Image.Image): input image
+        """
         return self.image.copy().paste(image, mask=self.mask)
         
 

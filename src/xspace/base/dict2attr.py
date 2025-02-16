@@ -1,7 +1,14 @@
 from types import SimpleNamespace
 
 class Dict2Attr(SimpleNamespace):
+    """ Convert a dictionary to a class with attributes.
+
+        Args:
+            dictionary (dict): a python dictionary
+            **kwargs: other keyword arguments
+    """
     def __init__(self, dictionary, **kwargs):
+        
         super().__init__(**kwargs)
         for key, value in dictionary.items():
             if isinstance(value, dict):
@@ -17,3 +24,6 @@ class Dict2Attr(SimpleNamespace):
     
     def __setitem__(self, key, value):
         self.dictionary[key] = value
+    
+    def kwargs(self):
+        return self.dictionary

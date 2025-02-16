@@ -10,12 +10,19 @@ class PNGMode(StrEnum):
     LSB = 'lsb'
 
 class PNGHide:
-    def __init__(self, hide_mode: PNGMode='endian') -> None:
-        """hide str information into png image
+    """hide str information into png image
 
-        Args:
-            hide_mode (str, optional): hide mode['lsb' in image, 'endian' to append image]. Defaults to 'endian'.
-        """
+    Args:
+        hide_mode (PNGMode, optional): hide mode['lsb' in image, 'endian' to append image]. Defaults to 'endian'.
+    
+    Examples:
+        >>> from xspace.base import hpng
+        >>> hpng = hpng.PNGHide()
+        >>> hpng.encode('input.png', 'hello', 'output.png')
+        >>> hpng.decode('output.png') # 'hello'
+    """
+    def __init__(self, hide_mode: PNGMode='endian') -> None:
+        
         self.magicBytes = {
             "unencryptedLSB": 0xdeadc0de,
             "unencrypted": 0x5afec0de
@@ -70,16 +77,18 @@ class PNGHide:
         return bytes(deserializeData)
 
     def encode(self, inputImagePath: str|Image.Image, hide_strs: str|Dict, outputImagePath: str) -> None:
-        """
-        This function hides the fileToHidePath file inside the image located at inputImagePath,
-        and saves this modified image to outputImagePath.
-        """
-        # fp = open(fileToHidePath, "rb")
+        """ encode str or dict into image
 
-        # data = fp.read()
-        data = bytes(hide_strs, "utf-8")
+        Args:
+            inputImagePath (str | Image.Image): input image path or PIL image object
+            hide_strs (str | Dict): str or dict to hide
+            outputImagePath (str): output image path
+        """
+        
         if isinstance(hide_strs, Dict):
             hide_strs = json.dumps(hide_strs, ensure_ascii=False)
+        data = bytes(hide_strs, "utf-8")
+        
         logger.debug("[*] {} file size : {} bytes".format(hide_strs, len(data)))
 
         if self.hide_mode == PNGMode.LSB:
@@ -151,9 +160,13 @@ class PNGHide:
             raise "Invalid hide mode"
     
     def decode(self, inputImagePath: str|bytes) -> None:
+        """ decode str or dict from image
+        Args:
+            inputImagePath (str | bytes): input image path or bytes object
+        Returns:
+            str: str or dict from image
         """
-        This function extracts the hidden file from inputImagePath image and saves it to outputFilePath
-        """
+
         if isinstance(inputImagePath, bytes):
             inputImage = inputImagePath
         else:

@@ -5,7 +5,7 @@ from loguru import logger
 from .config import ConfigDict
 
 from pathlib import Path
-from typing import List
+from typing import List, Callable
 from copy import deepcopy as dcopy
 from .dict2attr import Dict2Attr
 
@@ -73,7 +73,26 @@ def get_class_defaults(conf_path=None, cls=None):
 
 
 class Input2Wargs:
-    def __init__(self, func):
+    def __init__(self, func:Callable):
+        """ get function's default parameters.
+
+        Args:
+            func (Callable): input function or module class.
+
+        Raises:
+            TypeError: Unsupported function type.
+
+        Examples:
+            >>> def func(a, b, c=3):
+            ...     pass
+            >>> input2wargs = Input2Wargs(func)
+            >>> input2wargs(1, b=2)  # {'a': 1, 'b': 2, 'c': 3}
+            >>> input2wargs(1, 2, 4)  # {'a': 1, 'b': 2, 'c': 4}
+            >>> input2wargs(1, 2, d=3)  # {'a': 1, 'b': 2, 'c': 3, 'd': 3}
+            >>> input2wargs['c'] # 3
+            >>> input2wargs['c'] = 4  # ValueError: Cannot set default value
+            >>> input2wargs.match(a=1, b=2, c=3, d=4)  # {'a': 1, 'b': 2, 'c': 3}
+        """
         sigature = inspect.signature(func)
         self.defaults = {}
         self.okeys = []
@@ -114,7 +133,22 @@ class Input2Wargs:
 
 
 class DefineInputs:
+    """ define input names, and return a Dict2Attr object.
+
+        Args:
+            names (List[str]): input names.
+        
+        >>> define = DefineInputs(["a", "b", "c"])
+        >>> params = define(1, 2, c=3)
+        >>> params.a
+        1
+        >>> params.b
+        2
+        >>> params.c
+        3
+    """
     def __init__(self, names:List[str]):
+        
         self.__kname = names
     
     def __call__(self, *args, **kwargs):

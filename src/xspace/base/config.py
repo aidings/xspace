@@ -2088,6 +2088,10 @@ def _yaml_load(stream, Loader=yaml.SafeLoader, object_pairs_hook=OrderedDict):
 
 
 class UserDict(ConfigDict):
+    """ a config dict, support yaml/json file and env variable.
+        \n 1. support ${key} to replace the value of key.
+        \n 2. support env:value/ENV:value from environment variable.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.__scan(self.__dict__['_fields'])
@@ -2175,6 +2179,19 @@ from collections import OrderedDict
 
 class xconfig:
     def __init__(self, module):
+        """ Create a configuration file for the module instance.
+
+        Args:
+            module (object): a class module
+        Example:
+            >>> from xconfig import xconfig
+            >>> @xconfig
+            >>> class A:
+            >>>     def __init__(self, a, b, c=3):
+            >>>         pass
+            >>> a = A(1,2)
+            >>> a.config # OrderedDict([('a', 1), ('b', 2), ('c', 3)])
+        """
         self.module = module
         self.module.config = OrderedDict()
         self.__get_inp(module)
@@ -2195,16 +2212,19 @@ class xconfig:
         self.module.config.update(param_dict)
     
     def __call__(self, *args, **kwargs):
+        config = self.module.config.to_dict()
         cfg_lst = list(self.module.config)
         for idx, arg in enumerate(args):
-            cfg_lst[idx] = arg
+            # cfg_lst[idx] = arg
+            key = cfg_lst[idx]
+            config[key] = arg
         for key, val in kwargs.items():
             if key in self.module.config.keys():
-                self.module.config[key] = val
+                config[key] = val
 
-        obj = self.module(**self.module.config.to_dict())
+        obj = self.module(**config)
         
-        obj.config = ConfigDict(self.module.config)
+        obj.config = ConfigDict(config)
         obj.config.lock()
         return obj
     

@@ -1,9 +1,19 @@
 from loguru import logger
+from typing import List, Callable
 
 class Batcher(object):
-    def __init__(self, list_data, batch_size=1, parse_ldata=None, **kwargs):
+    """ 根据batch_size 对list_data进行batch处理, 迭代器形式
+
+        Args:
+            list_data (List): 输入列表数据
+            batch_size (int, optional): 批量大小. Defaults to 1.
+            parse_ldata (Callable, optional): 处理一行数据方法. Defaults to None.
+    """
+    def __init__(self, list_data: List, batch_size: int=1, parse_ldata: Callable=None, **kwargs):
+        
         self.list_data = list_data 
         self.batch_size = batch_size
+        assert batch_size > 0, "batch_size must be greater than 0"
         self.idx = 0
         self._parse = parse_ldata or self._parse_ldata
         self.kwargs = kwargs
