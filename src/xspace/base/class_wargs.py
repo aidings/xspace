@@ -147,8 +147,13 @@ class DefineInputs:
         >>> params.c
         3
     """
-    def __init__(self, names:List[str]):
+    def __init__(self, names:List[str]=[]):
         
+        self.__kname = names
+    
+    def define(self, names:List[str]):
+        if len(self.__kname) > 0:
+            raise ValueError("Input names already defined")
         self.__kname = names
     
     def __call__(self, *args, **kwargs):
